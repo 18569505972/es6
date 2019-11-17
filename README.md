@@ -1,5 +1,3 @@
-# es6
-es6盲点知识梳理
 # es6基础知识  
 ## 解构赋值 
 解构赋值右边不是可遍历的结构Iterator，则会报错。  
@@ -146,10 +144,13 @@ Number.isInteger(num):判断是否为整数。（此方法判断int.0也为整�
 Number.isSafeInteger(num):判断整数num是否在js可识别数字区间内。  
 指数运算符：2**3=8。  
 ## 数组扩展
-Array.from(obj,mapLoop,this):可以将类数组（含有length属性）或者可遍历对象转换为数组。（es5写法：[].slice.call(obj)）  
+Array.from(obj,mapLoop,this):可以将类数组（含有length属性）或者可遍历对象转换为数组。（es5写法：[].slice.call(obj)）   
+Array.of(item1,item2,item3....)： 将一组数值​转换为数组。   
 target.find(funcion(value,index,arr)=>{value>0}):返回target中第一个匹配值，没有匹配值返回undefined。  
 target.findIndex((value,index,arr)=>{value>0}):返回target中第一个匹配值下标，没有匹配值返回undefined。     
 arr.includes(value，searchIndex):数组中是否包含value。 
+arr.fill(value,startIndex,endIndex)：使用给定值填充数组startIndex到endIndex位置（不包含endIndex）。  
+arr.copyWithin(replaceIndex,startIndex,endIndex)：​用startIndex（默认为0）到endIndex（默认为arr.length）元素替换replaceIndex起的数据。   
 arr.forEach((value,index,arr)=>{}):forEach不返回值，不改变原数组。   
 arr.map((value,index,arr)=>{return value}):返回新数组，不能深复制。  
 for...of:遍历可迭代对象。  
@@ -170,8 +171,190 @@ foo(1)
   1
   1
 */
+function bar(x,y=1){
+  console.log(x,y)
+}
+/*
+  undefined
+  1
+*/
+``` 
+与解构赋值一起使用。  
 ```
-扩展运算符，展开iterate对象。  
+function foo({x,y=1}) {
+  console.log(x,y)
+}
+foo({})
+/*
+  x:undefined
+  y:1
+*/
+foo()
+// TypeError: Cannot read property 'x' of undefined
+function foo(a,{b,c=1}) {
+  console.log(a,b,c)
+}
+foo(1)
+// TypeError: Cannot read property 'x' of undefined
+foo(1,{})
+/*
+  a:1
+  b:undefined
+  c:1
+*/
+function foo(a,{b,c=1}={}) {
+  console.log(a,b,c)
+}
+foo(1)
+/*
+  a:1
+  b:undefined
+  c:1
+*/
+```  
+rest参数（只能为函数最后一个参数，否则报错）。  
+```
+function foo(a,...b){
+  console.log(a,b)
+}
+foo(1,2,3,4,5)
+/*
+  a:1
+  b:[2,3,4,5]
+*/
+```
+length属性：返回参数个数（不包含有默认值的参数,rest参数）。  
 name属性:返回函数名（匿名函数返回空）。  
-箭头函数:this取决于定义位置，它自身无this，不能使用yield、arguments、call、bind、apply以及new。   
+扩展运算符，展开iterate对象。
+```
+// 合并数组
+let a = [1,2];
+let b = [3,4];
+console.log([...a,...b])
+// [1,2,3,4]
+[...'hello']
+// ['h','e','l','l','o']
+var nodeList = document.querySelectorAll('div');
+var array = [...nodeList];
+```
+函数柯里化。
+```
+// 通用函数
+function createCurry(func, arg) {
+    var arity = func.length;
+    var args = arg || [];
+
+    return function() {
+        var _args = [...arguments,...arg];
+        // 如果参数个数小于最初的func.length，则递归调用，继续收集参数
+        if (_args.length < arity) {
+            return createCurry.call(this, func, _args);
+        }
+        // 参数收集完毕，则执行func
+        return func.apply(this, _args);
+    }
+}
+function sum(a,b,c){
+  return a+b+c
+}
+var curry = createCurry(sum,[1,2]);
+curry(3)
+// 6
+// 面试经典题
+function add() {
+    // 第一次执行时，定义一个数组专门用来存储所有的参数
+    var _args =[...arguments];
+
+    // 利用闭包的特性保存_args并收集所有的参数值
+    var _adder = function() {
+        _args.push(...arguments);
+        return _adder;
+    };
+
+    // 利用toString隐式转换的特性，当最后执行时隐式转换，并计算最终的值返回
+    _adder.valueOf = function () {
+        return _args.reduce(function (a, b) {
+            return a + b;
+        });
+    }
+    return _adder;
+}
+add(1)(2)(3)                
+// 6
+add(1, 2, 3)(4)            
+ // 10
+add(1)(2)(3)(4)(5)          
+// 15
+add(2, 6)(1)               
+ // 9
+```
+箭头函数:this取决于定义位置，它自身无this，不能使用yield、arguments、call、bind、apply以及new。 
 尾调用、尾递归的内存优化，防止栈溢出。 
+## 对象的扩展
+属性名表达式。  
+```
+var key = 'name';
+var funcNm = 'getName';
+var obj = {
+  [key]:'张三',
+  age:25,
+  [funcNm]() {
+    return this[key]
+  }
+}
+obj[funcNm].name
+// getname
+``` 
+Object.is(val1,val2)：比较val1和val2是否严格相等。  
+```
+Object.is({},{})
+// false
+Object.is(+0,-0)
+// false
+Object.is(NaN,NaN)
+// true
+```
+Object.assign特例。  
+```
+Object.assign({},undefined)
+// {}
+Object.assign({},null)
+// {}
+Object.assign({},'abc',true,1)
+// {0:'a',1:'b',2:'c'}
+```
+Object.keys(obj)：返回对象自身可枚举属性组成的数组。  
+Object.values(obj)：返回对象自身可枚举属性值组成的数组。  
+Object.entries(obj)：返回对象自身可枚举属性键值数组组成的数组。
+Object.getOwnPropertyNames(obj)：返回对象自身所有属性（不含Symbol属性，包括不可枚举属性）。   
+Object.getOwnPropertySymbols(obj)：返回对象自身所有Symbol属性。  
+Reflect.ownKeys(obj)：返回对象自身所有属性。    
+obj._proto_：设置或读取当前对象的property属性。   
+Object.setPrototypeOf(obj,proto)：设置对象的prototype属性。  
+Object.getPrototypeyOf(obj)：读取对象的prototype属性。  
+```
+var proto = {}
+var obj = {a:1}
+Object.setPrototypeOf(obj,proto)
+proto.b = 2
+proto.c = 3
+obj.a
+// 1
+obj.b
+// 5
+obj.c
+// 2
+
+```
+## Class
+es6类内部方法不可枚举。constructor中为类自身属性，否则为prototype上属性。  
+es5的继承是先创建子类this在设置父类方法，es6是先创建父类实例this，子类再修改它（可继承父类实例、prototype以及static静态方法）。  
+es6子类调用父类方法this仍然指向的是子类。    
+
+
+
+
+
+
+
+
