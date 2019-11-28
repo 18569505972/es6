@@ -157,7 +157,7 @@ for...of:遍历可迭代对象。
 arr.filter((value,index,arr)=>{return value>0}):返回满足条件的元素组成的新数组。  
 arr.every((value,index,arr)=>{return value>0}):判断是否每个元素符合条件，返回布尔值。  
 arr.some((value,index,arr)=>{return value>0}):判断是否存在元素符合条件，返回布尔值。  
-arr.reduce((preValue,currentValue,index,arr)=>{return preValue+currentValue}):数组值累加。  
+arr.reduce((preValue,currentValue,index,arr)=>{return preValue+currentValue},initialVal):数组值累加,initialVal初始值。  
 keys，values，entriesf:返回遍历器对象，可被for...of遍历。  
 ## 函数扩展
 es6可设置函数默认值。  
@@ -332,19 +332,115 @@ Reflect.ownKeys(obj)：返回对象自身所有属性。
 obj._proto_：设置或读取当前对象的property属性。   
 Object.setPrototypeOf(obj,proto)：设置对象的prototype属性。  
 Object.getPrototypeyOf(obj)：读取对象的prototype属性。  
+super：super关键字指向当前对象的原型。
 ```
 var proto = {}
-var obj = {a:1}
+var obj = {
+  a: ​1,
+  foo() {
+    return super.b​
+  ​}
+​​}
 Object.setPrototypeOf(obj,proto)
 proto.b = 2
 proto.c = 3
 obj.a
 // 1
 obj.b
-// 5
+// 2​
 obj.c
-// 2
+// 3​
+obj.foo()
+// 2​
+```
+对象扩展运算符是浅拷贝，后边的值会覆盖前边的值。
+```
+let obj = {a:1,b:2,c:3}
+let o = {...obj,a:4}
+// {a: 4, b: 2, c: 3}
+```
+## System
+## set和map
+### set数据结构
+set默认遍历器为values方法。  
+set.add(val)：添加值返回set结构本身，重复的默认忽略，set不存在类型转换，判断是否存在使用严格全等判断，唯一特例NAN算同一个值。  
+set.delete(val)：删除值，返回布尔值。  
+set.has(val)：是否存在val，返回布尔值。    
+set.clear()：清空set，无返回。  
+set.size：set成员数。
+### weakSet数据结构
+weakSet成员只能为对象，其他对象不在引用weakSet成员对象，weakSet成员对象自动被垃圾回收。  
+weakset.add(val)：添加新成员。  
+weakset.delete(val)：删除成员。  
+weakset.has(val)：是否存在某对象。  
+## map数据结构
+类似于对象，但它的键值可以为任何值，map的遍历顺序是插入顺序，默认遍历方法为entries。  
+map.size：map成数。  
+map.set(key,val)：添加数据，返回map结构，键值严格相等则视为同一个键值，唯一特例NAN被视为同一键值。  
+map.get(key)：获取数据，不存在返回undefined。  
+map.has(key)：是否存在某个键值，返回布尔值。  
+map.delete(key)：删除某对键值，返回布尔值。  
+map.clear()：情况map，无返回。  
+### weakmap
+只接受对象作为键值，其他对象不在引用weakmap成员对象，weakmap成员对象自动被垃圾回收。 
+weakmap.set(key,val)：添加数据，返回weakmap结构。  
+weakmap.get(key)：获取数据，不存在返回undefined。  
+weakmap.has(key)：是否存在某个键值，返回布尔值。  
+weakmap.delete(key)：删除某对键值，返回布尔值。
+## Proxy 
+```
+// target为代理对象，handle代理处理函数,proxy中的this指向自身而不是target
+var proxy = new Proxy(target,handle)
+function handle() {
+  return {
+    // 拦截读取操作，target为拦截对象，property为拦截属性
+    get(target,property) {
+      return target[property]
+    },
+    // 拦截赋值操作，target为拦截对象，property为拦截属性，value为赋值
+    set(target,property,value) {
 
+    },
+    // 拦截函数调用，target为拦截对象，context为上下文this，args参数数组
+    apply(target,context,args) {
+
+    },
+    // 拦截key in obj中的in操作符
+    has(target,property) {
+
+    },
+    // 拦截new操作
+    construct(target,args) {
+
+    },
+    // 拦截delete操作
+    deleteProperty(target,property) {
+
+    },
+    // 拦截defineProperty操作
+    defineProperty(target,property) {
+
+    }
+    // getOwnPropertyDescriptor、getPrototypeOf、isExtensible、ownKeys、preventExtensions、setPrototypeOf同上
+  }
+}
+// 取消代理
+let {proxy, revoke} = Proxy.revocable(target, handler);
+revoke()
+// Reflect替代Object属性方法
+Reflect.apply(target,thisArg,args)
+Reflect.construct(target,args)
+Reflect.get(target,name,receiver)
+Reflect.set(target,name,value,receiver)
+Reflect.defineProperty(target,name,desc)
+Reflect.deleteProperty(target,name)
+Reflect.has(target,name)
+Reflect.ownKeys(target)
+Reflect.isExtensible(target)
+Reflect.preventExtensions(target)
+Reflect.getOwnPropertyDescriptor(target, name)
+Reflect.getPrototypeOf(target)
+Reflect.setPrototypeOf(target, prototype)
 ```
 ## Class
 es6类内部方法不可枚举。constructor中为类自身属性，否则为prototype上属性。  
