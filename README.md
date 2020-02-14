@@ -174,4 +174,17 @@ foo(1)
 扩展运算符，展开iterate对象。  
 name属性:返回函数名（匿名函数返回空）。  
 箭头函数:this取决于定义位置，它自身无this，不能使用yield、arguments、call、bind、apply以及new。   
-尾调用、尾递归的内存优化，防止栈溢出。 
+尾调用、尾递归的内存优化，防止栈溢出。  
+## 对象的扩展
+对象赋值器setter与取值器getter。  
+```
+var obj = {
+  count: 0,
+  get a() {
+    return this.count
+  },
+  set a(value) {
+    this.count = value
+  }
+}
+```
