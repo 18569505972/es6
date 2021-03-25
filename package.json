@@ -1,0 +1,34 @@
+{
+  "name": "es6",
+  "version": "1.0.0",
+  "description": "解构赋值右边不是可遍历的结构Iterator，则会报错。   ``` let [a,b,...c]=['a'] /*   a: a    b: undefined   c: [] */",
+  "main": "index.js",
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": "prettier --write --ignore-unknown"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^12.0.1",
+    "@commitlint/config-conventional": "^12.0.1",
+    "husky": "^5.1.3",
+    "lint-staged": "^10.5.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/18569505972/es6.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/18569505972/es6/issues"
+  },
+  "homepage": "https://github.com/18569505972/es6#readme"
+}
